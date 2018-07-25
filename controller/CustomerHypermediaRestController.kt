@@ -19,12 +19,10 @@ import java.util.Collections
 import java.util.stream.Collector
 import java.util.stream.Collectors
 
-//@formatter:off
-//@formatter:on
 
 // <1>
 @RestController
-@RequestMapping(value = "/v2", produces = ["application/hal+json"])
+@RequestMapping(value = ["/v2"], produces = ["application/hal+json"])
 class CustomerHypermediaRestController @Autowired
 constructor(private val customerResourceAssembler: CustomerResourceAssembler, // <2>
             private val customerRepository: CustomerRepository) {
@@ -55,7 +53,7 @@ constructor(private val customerResourceAssembler: CustomerResourceAssembler, //
         return ResponseEntity.ok(objects)
     }
 
-    @RequestMapping(value = "/customers", method = [(RequestMethod.OPTIONS)])
+    @RequestMapping(value = ["/customers"], method = [(RequestMethod.OPTIONS)])
     fun options(): ResponseEntity<*> {
         return ResponseEntity
                 .ok()
@@ -63,14 +61,14 @@ constructor(private val customerResourceAssembler: CustomerResourceAssembler, //
                         HttpMethod.PUT, HttpMethod.DELETE).build<Any>()
     }
 
-    @GetMapping(value = "/customers/{id}")
+    @GetMapping(value = ["/customers/{id}"])
     operator fun get(@PathVariable id: Long): ResponseEntity<Resource<Customer>> {
         return this.customerRepository.findById(id)
                 .map { c -> ResponseEntity.ok(this.customerResourceAssembler.toResource(c)) }
                 .orElseThrow { CustomerNotFoundException(id) }
     }
 
-    @PostMapping(value = "/customers")
+    @PostMapping(value = ["/customers"])
     fun post(@RequestBody c: Customer): ResponseEntity<Resource<Customer>> {
         val customer = this.customerRepository.save(Customer(c
                 .firstName!!, c.lastName!!))
@@ -80,7 +78,7 @@ constructor(private val customerResourceAssembler: CustomerResourceAssembler, //
                 this.customerResourceAssembler.toResource(customer))
     }
 
-    @DeleteMapping(value = "/customers/{id}")
+    @DeleteMapping(value = ["/customers/{id}"])
     fun delete(@PathVariable id: Long): ResponseEntity<*> {
         return this.customerRepository.findById(id).map { c ->
             customerRepository.delete(c)
@@ -88,7 +86,7 @@ constructor(private val customerResourceAssembler: CustomerResourceAssembler, //
         }.orElseThrow { CustomerNotFoundException(id) }
     }
 
-    @RequestMapping(value = "/customers/{id}", method = arrayOf(RequestMethod.HEAD))
+    @RequestMapping(value = ["/customers/{id}"], method = [(RequestMethod.HEAD)])
     fun head(@PathVariable id: Long): ResponseEntity<*> {
         return this.customerRepository.findById(id)
                 .map { exists -> ResponseEntity.noContent().build<Any>() }

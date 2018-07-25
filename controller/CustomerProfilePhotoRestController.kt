@@ -22,11 +22,8 @@ import java.util.concurrent.Callable
 
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest
 
-//@formatter:off
-//@formatter:on
-
 @RestController
-@RequestMapping(value = "/customers/{id}/photo")
+@RequestMapping(value = ["/customers/{id}/photo"])
 class CustomerProfilePhotoRestController @Autowired
 internal constructor(
         @Value("\${upload.dir:\${user.home}/images}") uploadDir: String,
@@ -61,13 +58,13 @@ internal constructor(
     @RequestMapping(method = [(RequestMethod.POST), (RequestMethod.PUT)])
     // <3>
     @Throws(Exception::class)
-    internal fun write(@PathVariable id: Long?,
+    internal fun write(@PathVariable id: Long,
                        @RequestParam file: MultipartFile): Callable<ResponseEntity<*>> {
         log.info(String.format("upload-start /customers/%s/photo (%s bytes)", id,
                 file.size))
         return Callable {
             this.customerRepository
-                    .findById(id!!)
+                    .findById(id)
                     .map { customer ->
                         val fileForCustomer = fileFor(customer)
                         try {
@@ -76,14 +73,14 @@ internal constructor(
                             throw RuntimeException(ex)
                         }
 
-                        val location = fromCurrentRequest().buildAndExpand(id!!).toUri() // <4>
+                        val location = fromCurrentRequest().buildAndExpand(id).toUri() // <4>
                         log.info(String.format("upload-finish /customers/%s/photo (%s)", id, location))
                         ResponseEntity.created(location)
-                    }.orElseThrow { CustomerNotFoundException(id!!) }.build<Any>()
+                    }.orElseThrow { CustomerNotFoundException(id) }.build<Any>()
         }
     }
 
     private fun fileFor(person: Customer): File {
-        return File(this.root, java.lang.Long.toString(person.id!!))
+        return File(this.root, java.lang.Long.toString(person.id))
     }
 }
